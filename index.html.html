@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BBP Interactive Branching Deck — Academy Podium Edition</title>
+  <style>
+    :root {
+      --bg-main: #0c1117;
+      --bg-panel: #141c26;
+      --bg-card: #1b2533;
+      --bg-hover: #243144;
+      --border: #2c3a4f;
+      --text-primary: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent-blue: #38bdf8;
+      --accent-amber: #f59e0b;
+      --accent-green: #22c55e;
+      --accent-red: #ef4444;
+      --accent-purple: #a78bfa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 24px;
+      background-color: var(--bg-panel);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      background-color: rgba(239, 68, 68, 0.16);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timer-readout {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent-amber);
+      min-width: 52px;
+      text-align: center;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    button:hover {
+      background-color: var(--bg-hover);
+      border-color: #475569;
+    }
+
+    button.primary {
+      background-color: rgba(56, 189, 248, 0.18);
+      border-color: var(--accent-blue);
+      color: #e0f2fe;
+    }
+
+    button.primary:hover {
+      background-color: rgba(56, 189, 248, 0.28);
+    }
+
+    button.reveal-btn {
+      background-color: rgba(245, 158, 11, 0.18);
+      border-color: var(--accent-amber);
+      color: #fef3c7;
+    }
+
+    button.reveal-btn:hover {
+      background-color: rgba(245, 158, 11, 0.28);
+    }
+
+    .scenario-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 24px;
+      background-color: #101720;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-tab {
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .nav-tab.active {
+      background-color: rgba(56, 189, 248, 0.16);
+      border-color: var(--accent-blue);
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .scenario-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .scenario-tag {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-blue);
+    }
+
+    .scenario-title {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 4px 0 0 0;
+    }
+
+    .objective-pill {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 999px;
+    }
+
+    .grid-layout {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      border-spacing: 20px 0;
+      margin: 0 -20px;
+    }
+
+    .col-media {
+      display: table-cell;
+      width: 50%;
+      vertical-align: top;
+    }
+
+    .col-decision {
+      display: table-cell;
+      width: 50%;
+      vertical-align: top;
+    }
+
+    .panel {
+      background-color: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .panel-heading-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .panel-heading {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--text-muted);
+      margin: 0;
+    }
+
+    .stage-pill {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background-color: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #bae6fd;
+    }
+
+    .stage-pill.outcome-stage {
+      background-color: rgba(245, 158, 11, 0.16);
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fde68a;
+    }
+
+    video {
+      width: 100%;
+      max-height: 340px;
+      border-radius: 8px;
+      background-color: #05080c;
+      border: 1px solid var(--border);
+      display: block;
+    }
+
+    .fallback-card {
+      background-color: #0f1621;
+      border: 1px dashed #475569;
+      border-radius: 10px;
+      padding: 18px;
+    }
+
+    .fallback-badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-amber);
+      background-color: rgba(245, 158, 11, 0.14);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      padding: 3px 8px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .scene-script {
+      font-size: 16px;
+      color: var(--text-primary);
+      margin: 0 0 14px 0;
+    }
+
+    .prompt-box {
+      background-color: #16202e;
+      border: 1px solid #2c3a4f;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-top: 10px;
+    }
+
+    .prompt-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-purple);
+      margin-bottom: 4px;
+    }
+
+    .choice-btn {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    .choice-btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .choice-key {
+      display: inline-block;
+      font-weight: 800;
+      color: var(--accent-blue);
+      margin-right: 10px;
+    }
+
+    .choice-btn.selected-strong {
+      border-color: var(--accent-green);
+      background-color: rgba(34, 197, 94, 0.14);
+    }
+
+    .choice-btn.selected-trap {
+      border-color: var(--accent-red);
+      background-color: rgba(239, 68, 68, 0.14);
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .debrief-panel {
+      background-color: #121c29;
+      border: 1px solid #334863;
+      border-left: 5px solid var(--accent-amber);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 18px;
+      display: none;
+    }
+
+    .debrief-panel.visible {
+      display: block;
+    }
+
+    .debrief-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fde68a;
+      margin: 0 0 10px 0;
+    }
+
+    .debrief-list {
+      margin: 8px 0 0 0;
+      padding-left: 20px;
+    }
+
+    .debrief-list li {
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .policy-note {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      background-color: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      font-size: 14px;
+      color: #e0f2fe;
+    }
+
+    .shortcuts-footer {
+      margin-top: 24px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    @media (max-width: 900px) {
+      .grid-layout,
+      .col-media,
+      .col-decision {
+        display: block;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .grid-layout {
+        border-spacing: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-badge">POST / In-Service</span>
+      <h1 class="brand-title">Bloodborne Pathogens — Branching Decision Deck</h1>
+    </div>
+    <div class="controls-bar">
+      <div class="timer-box">
+        <span>Callout Timer:</span>
+        <span id="timerDisplay" class="timer-readout">01:30</span>
+        <button id="timerToggleBtn" type="button" onclick="toggleTimer()">Start</button>
+        <button id="timerResetBtn" type="button" onclick="resetTimer()">Reset</button>
+      </div>
+      <button type="button" onclick="prevScenario()">Prev (&larr;)</button>
+      <button type="button" class="primary" onclick="nextScenario()">Next (&rarr;)</button>
+      <button type="button" onclick="resetDeckInMemory()">Reset Slide (R)</button>
+    </div>
+  </header>
+
+  <nav id="scenarioTabs" class="scenario-nav" aria-label="Scenarios"></nav>
+
+  <main class="container">
+    <div class="scenario-header">
+      <div>
+        <div id="scenarioTag" class="scenario-tag"></div>
+        <h2 id="scenarioTitle" class="scenario-title"></h2>
+      </div>
+      <div id="objectiveBadge" class="objective-pill"></div>
+    </div>
+
+    <div class="grid-layout">
+      <section class="col-media">
+        <div class="panel">
+          <div class="panel-heading-row">
+            <h3 id="mediaHeading" class="panel-heading">Setup Clip</h3>
+            <span id="stagePill" class="stage-pill">Step 1: Setup Video</span>
+          </div>
+          <div id="mediaContainer"></div>
+          <div id="clipSwitcherRow" class="action-row" style="display: none;">
+            <button type="button" onclick="switchClipView('setup')">View Setup Clip</button>
+            <button type="button" class="primary" onclick="switchClipView('choice')">Replay Chosen Outcome Clip</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="col-decision">
+        <div class="panel">
+          <h3 class="panel-heading">Class Decision: A or B?</h3>
+          <p id="scenarioPrompt" class="scene-script"></p>
+          <div id="choicesContainer"></div>
+          <div class="action-row">
+            <button type="button" class="reveal-btn" onclick="toggleDebrief()">Reveal "Why" Debrief (Space)</button>
+            <span id="selectionStatus" style="font-size: 13px; color: var(--text-muted);">Pick A or B to play the follow-up clip</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section id="debriefPanel" class="debrief-panel" aria-live="polite">
+      <h3 id="debriefTitle" class="debrief-title"></h3>
+      <p id="debriefSummary" class="scene-script"></p>
+      <ul id="debriefPoints" class="debrief-list"></ul>
+      <div id="policyNote" class="policy-note"></div>
+    </section>
+
+    <footer class="shortcuts-footer">
+      <div><strong>Keys:</strong> <code>A</code> / <code>B</code> or <code>1</code>–<code>2</code> Choose &amp; Play Next Clip &bull; <code>Space</code> Debrief &bull; <code>&larr;</code>/<code>&rarr;</code> Scenario &bull; <code>R</code> Reset</div>
+      <div>Stateless Podium Deck (Zero Browser Storage / No localStorage)</div>
+    </footer>
+  </main>
+
+  <script>
+    // Stateless in-memory deck state (no localStorage or sessionStorage used)
+    const SCENARIOS = [
+      {
+        id: 1,
+        tag: "Scenario 01 • Field Search & PPE",
+        title: "0140 Hours — Cargo Pocket Search",
+        objective: "Parenteral Risk, Universal Precautions & Glove Discipline",
+        setupVideo: "./videos/bbp_01_setup.mp4",
+        setupText: "It is 0140 hours on a wet street at a roadside arrest. A deputy with bare hands stands behind a handcuffed suspect in bulky cargo pants, pausing right at a thick side pocket.",
+        setupPrompt: "Realistic 8-second cinematic medium shot at night on a wet urban street lit by blue and red patrol cruiser lights and a flashlight beam. A handcuffed suspect in dark cargo pants stands facing away toward a patrol cruiser while a uniformed sheriff's deputy with bare hands stands strictly behind the suspect, pausing right beside a thick side cargo pocket. Steady medium framing, no text overlays, no blood, no injuries, no weapons shown.",
+        question: "The room sees the bare-handed pause at the cargo pocket. Which call—A or B—does the class make?",
+        choices: [
+          {
+            key: "A",
+            label: "Stop before reaching inside, step back, and put on protective nitrile gloves before continuing the search.",
+            outcome: "strong",
+            videoPath: "./videos/bbp_01_choice_a.mp4",
+            feedback: "Option A selected — playing Option A outcome clip. Strong call on gloves and disciplined search before contact.",
+            outcomeText: "The deputy steps back slightly, pulls blue protective nitrile gloves onto both hands, and approaches the search deliberately rather than groping blindly into the pocket.",
+            outcomePrompt: "Realistic nighttime street clip near a patrol cruiser with blue and red lights. A uniformed sheriff's deputy steps back slightly and pulls disposable blue protective gloves onto both hands before continuing a careful clothing search on a handcuffed suspect facing away. Steady medium shot, no text overlays, no blood, no injuries, no weapons shown."
+          },
+          {
+            key: "B",
+            label: "Reach into the deep cargo pocket bare-handed right away to clear the curb faster.",
+            outcome: "trap",
+            videoPath: "./videos/bbp_01_choice_b.mp4",
+            feedback: "Option B selected — playing Option B outcome clip. Parenteral trap—a hidden sharp, needle, or surprise bite happens fast on a blind bare-hand reach.",
+            outcomeText: "The deputy reaches bare-handed straight into the deep cargo pocket—and gets startled when a raccoon pops its head out and nips at the ungloved hand.",
+            outcomePrompt: "Realistic nighttime street clip by a patrol cruiser with emergency lights. A uniformed deputy with bare hands reaches into a suspect's deep cargo pocket and yanks his hand back in surprise when a small raccoon peeks out of the pocket. Steady medium framing, lighthearted training moment, no text overlays, no blood, no injuries, no weapons shown."
+          }
+        ],
+        debriefTitle: "Why This Matters: Parenteral Traps & Universal Precautions",
+        debriefSummary: "Parenteral exposures (needlesticks, cuts from glass/metal, or bites) happen fast when deputies rush searches or skip gloves. Universal Precautions mean treating every person and every body fluid as a potential biohazard—regardless of demeanor, appearance, or criminal history.",
+        debriefPoints: [
+          "Wear gloves for every search, arrest, or first-aid situation; consider double-gloving in high-risk environments.",
+          "Avoid blind pocket reaches—use disciplined search methods, reach tools, and puncture-resistant sharps containers.",
+          "Many infectious individuals are asymptomatic, and viruses like Hepatitis B can survive on surfaces for up to 7 days."
+        ],
+        policyNote: "POST / Policy Anchor: OSHA 29 CFR 1910.1030 Universal Precautions & SCSO Exposure Control Plan (PowerDMS / Training Academy)."
+      },
+      {
+        id: 2,
+        tag: "Scenario 02 • Custody & Torn PPE",
+        title: "Booking Struggle — Spit, Snag & Immediate Action",
+        objective: "Mucous Membrane / Non-Intact Skin, Torn PPE & Post-Exposure Steps",
+        setupVideo: "./videos/bbp_02_setup.mp4",
+        setupText: "During a struggle in booking/intake, a detainee spits toward the collar/face area and a deputy's glove snags while securing control.",
+        setupPrompt: "Realistic 8-second medium shot inside a brightly lit booking and intake room. Two uniformed deputies gain control over a detainee near a bench and pause as a glove snags near the collar after a scuffle. Steady camera, no text overlays, no blood, no injuries, no weapons shown.",
+        question: "Once the detainee is secured, which call—A or B—does the class pick?",
+        choices: [
+          {
+            key: "A",
+            label: "Immediately wash/flush exposed skin or irrigate eyes (15 min), report to a supervisor right away, and start medical/PEP evaluation.",
+            outcome: "strong",
+            videoPath: "./videos/bbp_02_choice_a.mp4",
+            feedback: "Option A selected — playing Option A outcome clip. Immediate wash/flush, 15-min eye rinse if needed, supervisor report, and medical/PEP.",
+            outcomeText: "The deputy steps out of the intake room immediately to wash/flush exposed skin or eyes and notifies a supervisor right away for a line-of-duty medical/PEP evaluation.",
+            outcomePrompt: "Realistic 6-second booking facility clip showing a uniformed deputy stepping away from a detainee area to wash hands and face at a sink and speak immediately with a supervisor. Steady framing, no text overlays, no blood, no injuries, no weapons shown."
+          },
+          {
+            key: "B",
+            label: "Finish booking paperwork and cell log entries first, then wash up and report it later.",
+            outcome: "trap",
+            videoPath: "./videos/bbp_02_choice_b.mp4",
+            feedback: "Option B selected — playing Option B outcome clip. Delaying decontamination and reporting on a mucous membrane/skin exposure is a trap.",
+            outcomeText: "The deputy stays at the booking terminal typing paperwork first instead of immediately washing/flushing and reporting the exposure.",
+            outcomePrompt: "Realistic 6-second booking room clip showing a uniformed deputy sitting at a computer desk typing reports instead of immediately washing up after an intake scuffle. Steady shot, no text overlays, no blood, no injuries, no weapons shown."
+          }
+        ],
+        debriefTitle: "Why This Matters: Immediate Action & Line-of-Duty Reporting",
+        debriefSummary: "Mucous membrane splashes (eyes, nose, mouth) and exposures through non-intact skin or torn PPE call for immediate decontamination and notification—not waiting until paperwork is done or shift ends.",
+        debriefPoints: [
+          "Cleanse immediately: wash cuts/needlesticks/skin with soap and water; flush splashes to nose, mouth, or skin with water.",
+          "Eye irrigation: flush eyes with water or saline for 15 minutes.",
+          "Torn or punctured PPE: replace immediately and wash the underlying skin.",
+          "Report & evaluate: notify your supervisor immediately (line-of-duty incident) and proceed to the designated medical facility for confidential post-exposure evaluation and prophylaxis (PEP)."
+        ],
+        policyNote: "POST / Policy Anchor: Immediate Post-Exposure Protocol & SCSO Exposure Control Plan reporting steps (PowerDMS / Training Academy)."
+      },
+      {
+        id: 3,
+        tag: "Scenario 03 • Work Practice Controls",
+        title: "Post-Transport — Squad Car & Booking Desk Habits",
+        objective: "Handwashing, Surface Survival & No Food/Drink/Lip Balm Rule",
+        setupVideo: "./videos/bbp_03_setup.mp4",
+        setupText: "After a transport and booking rush, a deputy sits with coffee and lip balm near reports right after taking gloves off.",
+        setupPrompt: "Realistic 8-second medium shot inside a patrol car and booking desk area after a transport. A uniformed deputy sits with a coffee cup and lip balm near paperwork after removing gloves, pausing before reaching for the cup. Steady camera, no text overlays, no blood, no injuries, no weapons shown.",
+        question: "What does the class choose for this post-transport moment—A or B?",
+        choices: [
+          {
+            key: "A",
+            label: "Wash hands thoroughly first and keep food, drink, and lip balm out of exposure/booking/squad areas where contamination is likely.",
+            outcome: "strong",
+            videoPath: "./videos/bbp_03_choice_a.mp4",
+            feedback: "Option A selected — playing Option A outcome clip. Handwashing is the #1 defense and food/drink/lip balm stay out of risk zones.",
+            outcomeText: "The deputy steps away from the coffee/lip balm to wash hands thoroughly first and keeps food, drink, and lip balm clear of contaminated areas.",
+            outcomePrompt: "Realistic 6-second station/restroom clip showing a uniformed deputy washing hands thoroughly with soap and water after a transport. Steady camera, no text overlays, no blood, no injuries, no weapons shown."
+          },
+          {
+            key: "B",
+            label: "Take a quick sip of coffee or apply lip balm right there while finishing notes.",
+            outcome: "trap",
+            videoPath: "./videos/bbp_03_choice_b.mp4",
+            feedback: "Option B selected — playing Option B outcome clip. Eating, drinking, or applying lip balm in exposure/booking/squad areas is a major work-practice violation.",
+            outcomeText: "The deputy reaches straight for the drink/lip balm in the post-transport area before washing hands.",
+            outcomePrompt: "Realistic 6-second patrol vehicle clip showing a uniformed deputy reaching for a coffee cup or lip balm inside the cab right after a transport. Steady camera, no text overlays, no blood, no injuries, no weapons shown."
+          }
+        ],
+        debriefTitle: "Why This Matters: Work Practice Controls & Clean Habits",
+        debriefSummary: "Handwashing is your #1 defense—especially immediately after glove removal—and you must never eat, drink, or apply lip balm in areas where exposure is likely, including booking areas or a squad car after transport.",
+        debriefPoints: [
+          "Wash hands immediately after removing gloves and before eating, drinking, applying lip balm, or touching your face.",
+          "Never eat, drink, or apply lip balm in exposure/booking areas or squad cars after transports.",
+          "Reinforce engineering and work practice controls: sharps containers, reach tools, and clean handling of gear."
+        ],
+        policyNote: "POST / Policy Anchor: OSHA 29 CFR 1910.1030 Work Practice Controls & SCSO Exposure Control Plan."
+      },
+      {
+        id: 4,
+        tag: "Scenario 04 • Pathogens, Vaccine & Policy",
+        title: "Shift Briefing — Pathogens, Hep B Shot & Finding the Plan",
+        objective: "HBV / HCV / HIV / OPIM, Hepatitis B Vaccine Rules & Exposure Control Plan",
+        setupVideo: "./videos/bbp_04_setup.mp4",
+        setupText: "At shift briefing, deputies talk about bloodborne pathogens, whether you can get the Hepatitis B shot later, and where agency policy lives.",
+        setupPrompt: "Realistic 8-second medium shot in a law enforcement briefing room with uniformed deputies seated before shift. Two deputies discuss vaccine options and policy rules while a supervisor listens. Steady camera, no text overlays, no blood, no injuries, no weapons shown.",
+        question: "Which call—A or B—does the room lock in for the follow-up clip?",
+        choices: [
+          {
+            key: "A",
+            label: "HBV has a vaccine (HCV has none); Hep B shot is free for at-risk staff, can be declined with a signed form, and can still be taken later in a high-risk role.",
+            outcome: "strong",
+            videoPath: "./videos/bbp_04_choice_a.mp4",
+            feedback: "Option A selected — playing Option A outcome clip. Accurate pathogen, vaccine opt-in/declination, and policy guidance.",
+            outcomeText: "The briefing confirms the pathogen differences, free Hep B vaccine availability (with right to decline via signed form or opt in later), and where to find the plan.",
+            outcomePrompt: "Realistic 6-second briefing room clip showing a uniformed instructor/supervisor pointing to training materials while deputies take notes. Steady framing, no text overlays, no blood, no injuries, no weapons shown."
+          },
+          {
+            key: "B",
+            label: "Signing a Hepatitis B vaccine declination form permanently bars you from getting the shot later.",
+            outcome: "trap",
+            videoPath: "./videos/bbp_04_choice_b.mp4",
+            feedback: "Option B selected — playing Option B outcome clip. False—you can choose to receive the vaccine later while still employed in a high-risk role.",
+            outcomeText: "The group is corrected on declination rules—signing a declination form does not permanently block getting the vaccine later while in a high-risk role.",
+            outcomePrompt: "Realistic 6-second briefing room clip showing a deputy shaking their head and clarifying a policy point with another deputy. Steady framing, no text overlays, no blood, no injuries, no weapons shown."
+          }
+        ],
+        debriefTitle: "Why This Matters: Pathogens, Vaccine Rights & Where the Plan Lives",
+        debriefSummary: "Knowing HBV, HCV, HIV, and OPIM (semen, vaginal secretions, or any fluid visibly contaminated with blood), plus your Hepatitis B vaccine rights and where to read the SCSO Exposure Control Plan, keeps the whole shift squared away.",
+        debriefPoints: [
+          "HBV (Hepatitis B): highly infectious, causes liver inflammation, vaccine-preventable. HCV (Hepatitis C): most common chronic bloodborne infection in the U.S., no vaccine. HIV attacks the immune system.",
+          "Hepatitis B vaccine: offered at no cost to employees with occupational exposure risk; may be declined with a signed form and requested later while still employed in a high-risk role.",
+          "SCSO Exposure Control Plan: reviewed/updated annually and available in PowerDMS or at the Training Academy."
+        ],
+        policyNote: "POST / Policy Anchor: SCSO Exposure Control Plan (PowerDMS / Training Academy) & OSHA 29 CFR 1910.1030."
+      }
+    ];
+
+    let currentIndex = 0;
+    let selectedChoice = null;
+    let activeClipMode = "setup"; // "setup" or "choice"
+    let debriefVisible = false;
+    let timerSeconds = 90;
+    let timerInterval = null;
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById("timerDisplay").textContent = formatTime(timerSeconds);
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById("timerToggleBtn");
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.textContent = "Start";
+      } else {
+        btn.textContent = "Pause";
+        timerInterval = setInterval(() => {
+          if (timerSeconds > 0) {
+            timerSeconds -= 1;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.textContent = "Start";
+          }
+        }, 1000);
+      }
+    }
+
+    function resetTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById("timerToggleBtn").textContent = "Start";
+      }
+      timerSeconds = 90;
+      updateTimerDisplay();
+    }
+
+    function renderTabs() {
+      const nav = document.getElementById("scenarioTabs");
+      nav.innerHTML = "";
+      SCENARIOS.forEach((sc, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "nav-tab" + (idx === currentIndex ? " active" : "");
+        btn.textContent = `0${sc.id}. ${sc.title.split("—")[0].trim()}`;
+        btn.onclick = () => selectScenario(idx);
+        nav.appendChild(btn);
+      });
+    }
+
+    function renderMedia(sc) {
+      const container = document.getElementById("mediaContainer");
+      const heading = document.getElementById("mediaHeading");
+      const pill = document.getElementById("stagePill");
+      const switcher = document.getElementById("clipSwitcherRow");
+      container.innerHTML = "";
+
+      const isOutcome = activeClipMode === "choice" && selectedChoice;
+      const videoSrc = isOutcome ? selectedChoice.videoPath : sc.setupVideo;
+      const fallbackText = isOutcome ? selectedChoice.outcomeText : sc.setupText;
+      const fallbackPrompt = isOutcome ? selectedChoice.outcomePrompt : sc.setupPrompt;
+
+      if (isOutcome) {
+        heading.textContent = `Outcome Clip — Option ${selectedChoice.key}`;
+        pill.textContent = `Step 2: Option ${selectedChoice.key} Video`;
+        pill.classList.add("outcome-stage");
+      } else {
+        heading.textContent = "Setup Clip (~8–15s)";
+        pill.textContent = "Step 1: Setup Video";
+        pill.classList.remove("outcome-stage");
+      }
+
+      switcher.style.display = selectedChoice ? "flex" : "none";
+
+      const video = document.createElement("video");
+      video.controls = true;
+      video.preload = "metadata";
+      video.src = videoSrc;
+
+      const fallback = document.createElement("div");
+      fallback.className = "fallback-card";
+      fallback.style.display = "none";
+      fallback.innerHTML = `
+        <span class="fallback-badge">Briefing Card (No Local MP4 Found Yet)</span>
+        <p class="scene-script">${fallbackText}</p>
+        <div style="font-size: 13px; color: var(--text-muted);">
+          Expected local file: <code>${videoSrc}</code>
+        </div>
+        <div class="prompt-box">
+          <div class="prompt-label">Flow Prompt for This Clip</div>
+          <div>${fallbackPrompt}</div>
+        </div>
+      `;
+
+      video.addEventListener("error", () => {
+        video.style.display = "none";
+        fallback.style.display = "block";
+      });
+
+      container.appendChild(video);
+      container.appendChild(fallback);
+
+      if (isOutcome) {
+        video.play().catch(() => {
+          // Browser autoplay may require click if unmuted; controls remain ready
+        });
+      }
+    }
+
+    function switchClipView(mode) {
+      if (mode === "choice" && !selectedChoice) return;
+      activeClipMode = mode;
+      renderMedia(SCENARIOS[currentIndex]);
+    }
+
+    function renderChoices(sc) {
+      const container = document.getElementById("choicesContainer");
+      container.innerHTML = "";
+
+      sc.choices.forEach((choice) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "choice-btn";
+        if (selectedChoice && selectedChoice.key === choice.key) {
+          if (choice.outcome === "strong") btn.classList.add("selected-strong");
+          else btn.classList.add("selected-trap");
+        }
+        btn.innerHTML = `<span class="choice-key">[${choice.key}]</span>${choice.label}`;
+        btn.onclick = () => chooseOption(choice);
+        container.appendChild(btn);
+      });
+    }
+
+    function chooseOption(choice) {
+      selectedChoice = choice;
+      activeClipMode = "choice";
+      const sc = SCENARIOS[currentIndex];
+      renderChoices(sc);
+      renderMedia(sc);
+      document.getElementById("selectionStatus").textContent = choice.feedback;
+    }
+
+    function toggleDebrief(forceState) {
+      debriefVisible = typeof forceState === "boolean" ? forceState : !debriefVisible;
+      const panel = document.getElementById("debriefPanel");
+      if (debriefVisible) {
+        panel.classList.add("visible");
+      } else {
+        panel.classList.remove("visible");
+      }
+    }
+
+    function renderDebrief(sc) {
+      document.getElementById("debriefTitle").textContent = sc.debriefTitle;
+      document.getElementById("debriefSummary").textContent = sc.debriefSummary;
+      document.getElementById("policyNote").textContent = sc.policyNote;
+
+      const ul = document.getElementById("debriefPoints");
+      ul.innerHTML = "";
+      sc.debriefPoints.forEach((pt) => {
+        const li = document.createElement("li");
+        li.textContent = pt;
+        ul.appendChild(li);
+      });
+
+      toggleDebrief(debriefVisible);
+    }
+
+    function selectScenario(idx) {
+      currentIndex = Math.max(0, Math.min(SCENARIOS.length - 1, idx));
+      selectedChoice = null;
+      activeClipMode = "setup";
+      debriefVisible = false;
+      document.getElementById("selectionStatus").textContent = "Pick A or B to play the follow-up clip";
+
+      const sc = SCENARIOS[currentIndex];
+      document.getElementById("scenarioTag").textContent = sc.tag;
+      document.getElementById("scenarioTitle").textContent = sc.title;
+      document.getElementById("objectiveBadge").textContent = sc.objective;
+      document.getElementById("scenarioPrompt").textContent = sc.question;
+
+      renderTabs();
+      renderMedia(sc);
+      renderChoices(sc);
+      renderDebrief(sc);
+    }
+
+    function nextScenario() {
+      if (currentIndex < SCENARIOS.length - 1) {
+        selectScenario(currentIndex + 1);
+      } else {
+        selectScenario(0);
+      }
+    }
+
+    function prevScenario() {
+      if (currentIndex > 0) {
+        selectScenario(currentIndex - 1);
+      } else {
+        selectScenario(SCENARIOS.length - 1);
+      }
+    }
+
+    function resetDeckInMemory() {
+      selectScenario(currentIndex);
+      resetTimer();
+    }
+
+    document.addEventListener("keydown", (e) => {
+      const sc = SCENARIOS[currentIndex];
+      const key = e.key.toLowerCase();
+      if ((key === "a" || e.key === "1") && sc.choices[0]) chooseOption(sc.choices[0]);
+      else if ((key === "b" || e.key === "2") && sc.choices[1]) chooseOption(sc.choices[1]);
+      else if (e.key === " ") {
+        e.preventDefault();
+        toggleDebrief();
+      } else if (e.key === "ArrowRight") {
+        nextScenario();
+      } else if (e.key === "ArrowLeft") {
+        prevScenario();
+      } else if (key === "r") {
+        resetDeckInMemory();
+      }
+    });
+
+    updateTimerDisplay();
+    selectScenario(0);
+  </script>
+</body>
+</html>
